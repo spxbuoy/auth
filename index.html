@@ -12,15 +12,31 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: Arial, sans-serif;
+      font-family: "Courier New", monospace;
       color: white;
+      overflow: hidden;
     }
     .box {
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.75);
       padding: 30px;
-      border-radius: 12px;
+      border-radius: 15px;
       text-align: center;
-      width: 400px;
+      width: 420px;
+      box-shadow: 0 0 25px #00ffcc;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    h3 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 5px #00ff99, 0 0 10px #00ff99; }
+      to { text-shadow: 0 0 20px #00ccff, 0 0 40px #00ccff; }
     }
     input {
       width: 90%;
@@ -29,13 +45,16 @@
       border-radius: 8px;
       margin-top: 10px;
       font-size: 16px;
-      background: #222;
-      color: white;
+      background: #111;
+      color: #00ffcc;
       text-align: center;
       outline: none;
+      border: 1px solid #00ffcc;
+      box-shadow: 0 0 10px #00ffcc inset;
+      transition: 0.3s;
     }
     input:focus {
-      box-shadow: 0 0 10px #00ff99;
+      box-shadow: 0 0 15px #00ffcc, 0 0 25px #00ccff inset;
     }
     button {
       margin-top: 15px;
@@ -46,23 +65,60 @@
       font-size: 18px;
       cursor: pointer;
       background: linear-gradient(90deg, #00ff99, #00ccff);
-      transition: 0.3s;
+      color: black;
+      font-weight: bold;
+      transition: 0.4s;
+      box-shadow: 0 0 15px #00ffcc;
     }
     button:hover {
-      opacity: 0.9;
+      transform: scale(1.05);
+      box-shadow: 0 0 25px #00ccff, 0 0 50px #00ff99;
     }
     .error {
       margin-top: 10px;
-      color: red;
+      color: #ff4444;
+      font-size: 15px;
+      animation: blink 1.2s infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0.5; }
+    }
+
+    /* floating code-like background text */
+    .matrix {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: rgba(0,255,150,0.15);
       font-size: 14px;
+      pointer-events: none;
+      white-space: pre;
+      animation: scroll 20s linear infinite;
+    }
+    @keyframes scroll {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(100%); }
     }
   </style>
 </head>
 <body>
+  <!-- floating hacker code effect -->
+  <div class="matrix">
+    010101010101010<br>
+    $ git clone repo<br>
+    > access granted...<br>
+    > verifying fork...<br>
+    > deploying bot...<br>
+    ██████████████<br>
+    010101010101010<br>
+  </div>
+
   <div class="box">
     <h3>Enter your GitHub username to Proceed</h3>
     <input type="text" id="username" placeholder="GitHub Username" />
-    <button onclick="deploy()">DEPLOY</button>
+    <button onclick="deploy()">DEPLOY 🚀</button>
     <div id="error" class="error"></div>
   </div>
 
@@ -73,7 +129,7 @@
       error.innerText = "";
 
       if (!username) {
-        error.innerText = "Please enter your GitHub username";
+        error.innerText = "⚠️ Please enter your GitHub username";
         return;
       }
 
@@ -82,9 +138,12 @@
         const data = await res.json();
 
         if (data.success) {
-          window.location.href = "https://dashboard.heroku.com"; // 🔹 your heroku deploy link
+          alert("✅ Verified! Redirecting...");
+          window.location.href = "https://dashboard.heroku.com"; // change to your deploy link
         } else {
-          error.innerText = "Please fork the repo before proceeding";
+          if (confirm("❌ You have not forked the repo.\nWould you like to fork now?")) {
+            window.open("https://github.com/spider660/Spider-bot/fork", "_blank");
+          }
         }
       } catch (err) {
         error.innerText = "Error checking fork. Try again.";
