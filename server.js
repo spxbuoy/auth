@@ -6,27 +6,36 @@ import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ES modules fix for __dirname
+// Fix dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Serve index.html directly
+app.use(express.static(__dirname));
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+// API to check fork/owner
 app.get("/check", async (req, res) => {
   const { username } = req.query;
 
   if (!username) {
-    return res.status(400).json({ success: false, message: "No username" });
+    return res.status(400).json({ success: false, message: "No username provided" });
   }
 
-  const owner = "spider660";   // your GitHub username
-  const repo = "Spider-bot";   // repo name only
+  const owner = "spider660";   // original repo owner
+  const repo = "Spider-bot";   // repo name
 
   try {
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/forks?per_page=100`);
+    // ✅ If the username is the owner → success
+    if (username.toLowerCase() === owner.toLowerCase()) {
+      return res.json({ success: true, owner: true });
+    }
+
+    // Otherwise, check forks
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/forks`);
 
     if (!response.ok) {
       return res.status(500).json({ success: false, error: "GitHub API error" });
@@ -38,7 +47,11 @@ app.get("/check", async (req, res) => {
       (fork) => fork.owner.login.toLowerCase() === username.toLowerCase()
     );
 
-    res.json({ success: forked });
+    if (forked) {
+      res.json({ success: true, fork: true });
+    } else {
+      res.json({ success: false, fork: false });
+    }
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
