@@ -6,12 +6,14 @@ import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Fix for ES modules __dirname
+// ES modules fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static frontend
-app.use(express.static(path.join(__dirname, "public")));
+// Serve index.html directly
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 app.get("/check", async (req, res) => {
   const { username } = req.query;
@@ -25,7 +27,7 @@ app.get("/check", async (req, res) => {
 
   try {
     const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/forks?per_page=100`);
-    
+
     if (!response.ok) {
       return res.status(500).json({ success: false, error: "GitHub API error" });
     }
