@@ -1,12 +1,17 @@
 import express from "express";
 import fetch from "node-fetch";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.send("Server is running ✅");
-});
+// Fix for ES modules __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static frontend
+app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/check", async (req, res) => {
   const { username } = req.query;
@@ -19,7 +24,7 @@ app.get("/check", async (req, res) => {
   const repo = "Spider-bot";   // repo name only
 
   try {
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/forks`);
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/forks?per_page=100`);
     
     if (!response.ok) {
       return res.status(500).json({ success: false, error: "GitHub API error" });
@@ -31,11 +36,7 @@ app.get("/check", async (req, res) => {
       (fork) => fork.owner.login.toLowerCase() === username.toLowerCase()
     );
 
-    if (forked) {
-      res.json({ success: true });
-    } else {
-      res.json({ success: false });
-    }
+    res.json({ success: forked });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
