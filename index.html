@@ -2,149 +2,166 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Spider Bot Deployment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Fork Verification</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: "Courier New", monospace;
-      height: 100vh;
+      background: url("https://files.catbox.moe/pe25s0.jpg") no-repeat center center fixed;
+      background-size: cover;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: black;
-      color: #00ffcc;
+      height: 100vh;
+      font-family: "Courier New", monospace;
+      color: white;
       overflow: hidden;
     }
-
-    /* Cyberpunk animated background */
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0;
-      width: 200%; height: 200%;
-      background: repeating-linear-gradient(
-        45deg,
-        rgba(0,255,204,0.1) 0px,
-        rgba(0,255,204,0.1) 2px,
-        transparent 2px,
-        transparent 6px
-      );
-      animation: moveBg 8s linear infinite;
-      z-index: -1;
-    }
-    @keyframes moveBg {
-      from { transform: translate(0,0); }
-      to { transform: translate(-200px,-200px); }
-    }
-
-    .card {
-      position: relative;
-      background: rgba(20, 20, 20, 0.9);
-      border: 2px solid #00ffcc;
+    .box {
+      background: rgba(0,0,0,0.75);
+      padding: 30px;
       border-radius: 15px;
-      padding: 2rem;
       text-align: center;
-      width: 350px;
-      box-shadow: 0 0 20px #00ffcc, inset 0 0 10px #00ffcc;
+      width: 420px;
+      box-shadow: 0 0 25px #00ffcc;
+      animation: float 3s ease-in-out infinite;
     }
-
-    .card h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      color: #ff0044;
-      text-shadow: 0 0 10px #ff0044;
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
     }
-
-    .card input {
-      padding: 10px;
-      border: 1px solid #00ffcc;
-      border-radius: 8px;
-      outline: none;
-      width: 100%;
-      margin-bottom: 1rem;
-      background: black;
-      color: #00ffcc;
+    h3 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      animation: glow 2s infinite alternate;
     }
-
-    .card button {
-      padding: 10px 20px;
-      background: #ff0044;
+    @keyframes glow {
+      from { text-shadow: 0 0 5px #00ff99, 0 0 10px #00ff99; }
+      to { text-shadow: 0 0 20px #00ccff, 0 0 40px #00ccff; }
+    }
+    input {
+      width: 90%;
+      padding: 12px;
       border: none;
       border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 0 10px #ff0044, inset 0 0 5px #ff0044;
-    }
-    .card button:hover {
-      background: #00ffcc;
-      box-shadow: 0 0 15px #00ffcc, inset 0 0 7px #00ffcc;
-      color: black;
-    }
-
-    .error {
-      color: red;
       margin-top: 10px;
-      font-size: 0.9rem;
+      font-size: 16px;
+      background: #111;
+      color: #00ffcc;
+      text-align: center;
+      outline: none;
+      border: 1px solid #00ffcc;
+      box-shadow: 0 0 10px #00ffcc inset;
+      transition: 0.3s;
     }
-
-    /* Modals */
+    input:focus {
+      box-shadow: 0 0 15px #00ffcc, 0 0 25px #00ccff inset;
+    }
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      background: linear-gradient(90deg, #00ff99, #00ccff);
+      color: black;
+      font-weight: bold;
+      transition: 0.4s;
+      box-shadow: 0 0 15px #00ffcc;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px #00ccff, 0 0 50px #00ff99;
+    }
+    .error {
+      margin-top: 10px;
+      color: #ff4444;
+      font-size: 15px;
+      animation: blink 1.2s infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0.5; }
+    }
+    /* floating code background */
+    .matrix {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: rgba(0,255,150,0.15);
+      font-size: 14px;
+      pointer-events: none;
+      white-space: pre;
+      animation: scroll 20s linear infinite;
+    }
+    @keyframes scroll {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(100%); }
+    }
+    /* modal popup */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
       justify-content: center;
       align-items: center;
     }
-
     .modal-content {
       background: #111;
-      padding: 2rem;
+      padding: 25px;
       border-radius: 12px;
-      border: 2px solid #00ffcc;
       text-align: center;
-      width: 300px;
-      box-shadow: 0 0 20px #00ffcc;
+      width: 350px;
+      box-shadow: 0 0 25px #00ffcc;
+      animation: pop 0.4s ease;
+      color: #00ffcc;
     }
-
-    .modal-content h2 {
-      margin-bottom: 1rem;
-      color: #ff0044;
-    }
-
-    .modal-content button {
-      margin-top: 1rem;
+    @keyframes pop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>🚀 Deploy Spider Bot</h1>
-    <input type="text" id="username" placeholder="Enter GitHub Username"/>
+  <div class="matrix">
+    010101010101010<br>
+    $ git clone repo<br>
+    > access granted...<br>
+    > verifying fork...<br>
+    > deploying bot...<br>
+    ██████████████<br>
+    010101010101010<br>
+  </div>
+
+  <div class="box">
+    <h3>Enter your GitHub username to Proceed</h3>
+    <input type="text" id="username" placeholder="GitHub Username" />
     <button onclick="deploy()">DEPLOY 🚀</button>
     <div id="error" class="error"></div>
   </div>
 
-  <!-- Fork Modal -->
-  <div id="forkModal" class="modal">
+  <!-- Fork modal -->
+  <div class="modal" id="forkModal">
     <div class="modal-content">
-      <h2>⚠️ Fork Required</h2>
-      <p>Please fork the repo first to continue.</p>
-      <button onclick="redirectFork()">Fork Now</button>
-      <button onclick="closeModal()">Close</button>
+      <h4>❌ You haven’t forked the repo</h4>
+      <p>Please fork it to continue.</p>
+      <button onclick="redirectFork()">Fork Now 🔗</button>
+      <button onclick="closeModal()">Cancel</button>
     </div>
   </div>
 
-  <!-- Success Modal -->
-  <div id="successModal" class="modal">
+  <!-- Success modal -->
+  <div class="modal" id="successModal">
     <div class="modal-content">
-      <h2>✅ Success!</h2>
-      <p>Redirecting you to Heroku...</p>
+      <h4>✅ Verified!</h4>
+      <p>Redirecting to Heroku...</p>
     </div>
   </div>
 
@@ -160,29 +177,31 @@
       }
 
       try {
-        const res = await fetch(`/check-fork/${username}`);
+        const res = await fetch(`/api/check-fork?username=${username}`);
         const data = await res.json();
 
         if (data.success) {
+          // Show success modal
           document.getElementById("successModal").style.display = "flex";
+
+          // Auto-redirect after 2 seconds
           setTimeout(() => {
-            window.location.href = "https://heroku.com/deploy";
+            window.location.href = "https://dashboard.heroku.com";
           }, 2000);
         } else {
           document.getElementById("forkModal").style.display = "flex";
         }
       } catch (err) {
-        console.error(err);
-        error.innerText = "⚠️ Error checking fork. Try again.";
+        error.innerText = "Error checking fork. Try again.";
       }
-    }
-
-    function closeModal() {
-      document.getElementById("forkModal").style.display = "none";
     }
 
     function redirectFork() {
       window.open("https://github.com/spider660/Spider-bot/fork", "_blank");
+      closeModal();
+    }
+    function closeModal() {
+      document.getElementById("forkModal").style.display = "none";
     }
   </script>
 </body>
