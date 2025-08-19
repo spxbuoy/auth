@@ -7,9 +7,9 @@ import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Replace with your main repo details
-const OWNER = "spider660";   // your GitHub username (the repo owner)
-const REPO = "Spider-bot";   // your repo name
+// Your main repo details
+const OWNER = "spider660";   // main repo owner
+const REPO = "Spider-bot";   // main repo name
 
 // Needed to resolve __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -24,9 +24,21 @@ app.get("/api/check-fork", async (req, res) => {
   }
 
   try {
-    const response = await fetch(`https://api.github.com/repos/${username}/${REPO}`);
+    // Get all forks of the main repo
+    const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/forks`);
 
-    if (response.status === 200) {
+    if (!response.ok) {
+      return res.json({ success: false, error: "GitHub API error" });
+    }
+
+    const forks = await response.json();
+
+    // See if the username is among the fork owners
+    const forked = forks.some(
+      (fork) => fork.owner.login.toLowerCase() === username.toLowerCase()
+    );
+
+    if (forked || username.toLowerCase() === OWNER.toLowerCase()) {
       return res.json({ success: true });
     } else {
       return res.json({ success: false });
@@ -37,7 +49,7 @@ app.get("/api/check-fork", async (req, res) => {
   }
 });
 
-// Serve your index.html directly (same folder as server.js)
+// Serve index.html directly (same folder as server.js)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
