@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ad it here i want the spider to be just there if he as not fork the spider thwos it <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -24,7 +24,6 @@
       width: 420px;
       box-shadow: 0 0 25px #00ffcc;
       animation: float 3s ease-in-out infinite;
-      z-index: 1;
     }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
@@ -96,84 +95,46 @@
       pointer-events: none;
       white-space: pre;
       animation: scroll 20s linear infinite;
-      z-index: 0;
     }
     @keyframes scroll {
       from { transform: translateY(-100%); }
       to { transform: translateY(100%); }
     }
-
-    /* 🕷️ Spider + Web + Popup */
-    #spider-container {
+    /* modal popup */
+    .modal {
       display: none;
       position: fixed;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
       z-index: 9999;
-      text-align: center;
-      pointer-events: none;
-    }
-    .web-line {
-      position: absolute;
+      left: 0;
       top: 0;
-      left: 50%;
-      width: 2px;
-      height: 0;
-      background: #fff;
-      animation: drop-line 2s linear forwards;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
     }
-    @keyframes drop-line {
-      to { height: 200px; }
-    }
-    .spider {
-      position: absolute;
-      top: 200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 40px;
-      background: black;
-      border-radius: 50%;
-      animation: swing 2s ease-in-out infinite;
-    }
-    @keyframes swing {
-      0% { transform: translateX(-50%) rotate(10deg); }
-      50% { transform: translateX(-50%) rotate(-10deg); }
-      100% { transform: translateX(-50%) rotate(10deg); }
-    }
-    .popup {
-      margin-top: 260px;
-      background: rgba(20, 20, 20, 0.95);
-      color: #0f0;
-      padding: 20px;
-      border: 2px solid #0f0;
+    .modal-content {
+      background: #111;
+      padding: 25px;
       border-radius: 12px;
-      width: 280px;
       text-align: center;
-      animation: drop-popup 2s ease forwards;
-      pointer-events: auto;
-      font-family: "Courier New", monospace;
-      box-shadow: 0 0 15px #0f0;
+      width: 350px;
+      box-shadow: 0 0 25px #00ffcc;
+      animation: pop 0.4s ease;
     }
-    @keyframes drop-popup {
-      0% { transform: translateY(-50px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
+    @keyframes pop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
-    .fork-btn {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 8px 16px;
-      color: black;
-      background: #0f0;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: 0.3s;
+    .modal-content h4 {
+      margin-bottom: 15px;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ccff;
     }
-    .fork-btn:hover {
-      background: lime;
-      box-shadow: 0 0 10px #0f0;
+    .modal-content button {
+      margin: 10px 5px;
+      width: auto;
+      padding: 10px 20px;
     }
   </style>
 </head>
@@ -195,14 +156,13 @@
     <div id="error" class="error"></div>
   </div>
 
-  <!-- 🕷️ Spider + Popup -->
-  <div id="spider-container">
-    <div class="web-line"></div>
-    <div class="spider"></div>
-    <div class="popup">
-      <h2>⚡ Fork Required ⚡</h2>
-      <p>You must fork <b>Spider-bot</b> before continuing.</p>
-      <a href="https://github.com/spider660/Spider-bot/fork" target="_blank" class="fork-btn">Fork Now</a>
+  <!-- Custom popup -->
+  <div class="modal" id="forkModal">
+    <div class="modal-content">
+      <h4>❌ You haven’t forked the repo</h4>
+      <p>Please fork it to continue.</p>
+      <button onclick="redirectFork()">Fork Now 🔗</button>
+      <button onclick="closeModal()">Cancel</button>
     </div>
   </div>
 
@@ -225,15 +185,19 @@
           alert("✅ Verified! Redirecting...");
           window.location.href = "https://dashboard.heroku.com"; 
         } else {
-          showSpiderPopup();
+          document.getElementById("forkModal").style.display = "flex";
         }
       } catch (err) {
         error.innerText = "Error checking fork. Try again.";
       }
     }
 
-    function showSpiderPopup() {
-      document.getElementById("spider-container").style.display = "block";
+    function redirectFork() {
+      window.open("https://github.com/spider660/Spider-bot/fork", "_blank");
+      closeModal();
+    }
+    function closeModal() {
+      document.getElementById("forkModal").style.display = "none";
     }
   </script>
 </body>
