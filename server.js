@@ -17,50 +17,52 @@ const GH_HEADERS = {
   "User-Agent": "fork-checker"
 };
 
-// Simple in-memory cache (username -> true)
-const verifiedUsers = new Map();
+// ✅ Permanent memory of verified users
+const verifiedUsers = new Set();
 
 // ✅ Check if user is owner or forked the repo
 async function hasUserForked(username) {
   if (!username) return false;
+
   username = username.toLowerCase();
 
-  // Cached users always pass
+  // If already verified once, always pass
   if (verifiedUsers.has(username)) {
     return true;
   }
 
   // Original owner always passes
   if (username === OWNER.toLowerCase()) {
-    verifiedUsers.set(username, true);
+    verifiedUsers.add(username);
     return true;
   }
 
-  // Loop through all fork pages
-  let page = 1;
-  while (true) {
-    const url = `https://api.github.com/repos/${OWNER}/${REPO}/forks?per_page=100&page=${page}`;
-    const resp = await fetch(url, { headers: GH_HEADERS });
+  // Direct check: does repo exist under username?
+  const repoUrl = `https://api.github.com/repos/${username}/${REPO}`;
+  const repoResp = await fetch(repoUrl, { headers: GH_HEADERS });
 
-    if (!resp.ok) {
-      console.error("GitHub API error:", resp.status);
-      return false;
-    }
-
-    const forks = await resp.json();
-    if (forks.length === 0) break; // no more pages
-
-    // Check this page
-    const found = forks.some(
-      (fork) => fork.owner && fork.owner.login.toLowerCase() === username
-    );
-
-    if (found) {
-      verifiedUsers.set(username, true); // cache success
+  if (repoResp.ok) {
+    const repoData = await repoResp.json();
+    if (
+      repoData.fork === true &&
+      repoData.parent &&
+      repoData.parent.full_name.toLowerCase() === `${OWNER}/${REPO}`.toLowerCase()
+    ) {
+      verifiedUsers.add(username); // store forever
       return true;
     }
+  }
 
-    page++;
+  // Fallback: check forks list
+  const forksUrl = `https://api.github.com/repos/${OWNER}/${REPO}/forks?per_page=100`;
+  const forksResp = await fetch(forksUrl, { headers: GH_HEADERS });
+  if (forksResp.ok) {
+    const forks = await forksResp.json();
+    const found = forks.some(f => f.owner.login.toLowerCase() === username);
+    if (found) {
+      verifiedUsers.add(username); // store forever
+      return true;
+    }
   }
 
   return false;
@@ -87,4 +89,6 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);
