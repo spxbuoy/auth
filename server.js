@@ -17,27 +17,26 @@ const GH_HEADERS = {
   "User-Agent": "fork-checker"
 };
 
+// ✅ FIXED FUNCTION
 async function hasUserForked(username) {
   if (username.toLowerCase() === OWNER.toLowerCase()) {
-    return true;
+    return true; // owner always passes
   }
 
-  let page = 1;
-  while (true) {
-    const url = `https://api.github.com/repos/${OWNER}/${REPO}/forks?per_page=100&page=${page}`;
-    const resp = await fetch(url, { headers: GH_HEADERS });
-    if (!resp.ok) break;
+  const url = `https://api.github.com/repos/${username}/${REPO}`;
+  const resp = await fetch(url, { headers: GH_HEADERS });
 
-    const forks = await resp.json();
-    if (forks.some(f => f.owner?.login.toLowerCase() === username.toLowerCase())) {
-      return true;
-    }
-
-    if (!Array.isArray(forks) || forks.length < 100) break;
-    page++;
+  if (!resp.ok) {
+    return false; // repo not found
   }
 
-  return false;
+  const repoData = await resp.json();
+
+  // Check if repo is fork and parent is OWNER/REPO
+  return (
+    repoData.fork &&
+    repoData.parent?.full_name?.toLowerCase() === `${OWNER}/${REPO}`.toLowerCase()
+  );
 }
 
 app.get("/api/check-fork", async (req, res) => {
@@ -57,4 +56,4 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
