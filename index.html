@@ -121,20 +121,11 @@
       width: 350px;
       box-shadow: 0 0 25px #00ffcc;
       animation: pop 0.4s ease;
+      color: #00ffcc;
     }
     @keyframes pop {
       from { transform: scale(0.8); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
-    }
-    .modal-content h4 {
-      margin-bottom: 15px;
-      color: #00ffcc;
-      text-shadow: 0 0 10px #00ccff;
-    }
-    .modal-content button {
-      margin: 10px 5px;
-      width: auto;
-      padding: 10px 20px;
     }
   </style>
 </head>
@@ -156,13 +147,21 @@
     <div id="error" class="error"></div>
   </div>
 
-  <!-- Custom popup -->
+  <!-- Fork modal -->
   <div class="modal" id="forkModal">
     <div class="modal-content">
       <h4>❌ You haven’t forked the repo</h4>
       <p>Please fork it to continue.</p>
       <button onclick="redirectFork()">Fork Now 🔗</button>
       <button onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Success modal -->
+  <div class="modal" id="successModal">
+    <div class="modal-content">
+      <h4>✅ Verified!</h4>
+      <p>Redirecting to Heroku...</p>
     </div>
   </div>
 
@@ -182,8 +181,13 @@
         const data = await res.json();
 
         if (data.success) {
-          alert("✅ Verified! Redirecting...");
-          window.location.href = "https://dashboard.heroku.com"; 
+          // Show success modal
+          document.getElementById("successModal").style.display = "flex";
+
+          // Auto-redirect after 2 seconds
+          setTimeout(() => {
+            window.location.href = "https://dashboard.heroku.com";
+          }, 2000);
         } else {
           document.getElementById("forkModal").style.display = "flex";
         }
