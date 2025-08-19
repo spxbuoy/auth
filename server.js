@@ -6,8 +6,8 @@ import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const OWNER = "spider660";   // Repo owner
-const REPO = "Spider-bot";   // Repo name
+const OWNER = "spider660";  // original repo owner
+const REPO = "Spider-bot";  // repo name
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,34 +17,33 @@ const GH_HEADERS = {
   "User-Agent": "fork-checker"
 };
 
-// Check if user forked the repo
+// ✅ Improved check: directly see if user owns a fork
 async function hasUserForked(username) {
-  try {
-    // Check if user has a repo with same name
-    const url = `https://api.github.com/repos/${username}/${REPO}`;
-    const resp = await fetch(url, { headers: GH_HEADERS });
-    if (!resp.ok) return false;
+  if (!username) return false;
 
-    const data = await resp.json();
-
-    // Must be fork of OWNER/REPO
-    return (
-      data.fork === true &&
-      data.parent?.full_name?.toLowerCase() === `${OWNER}/${REPO}`.toLowerCase()
-    );
-  } catch (err) {
-    console.error("Error checking fork:", err);
-    return false;
+  if (username.toLowerCase() === OWNER.toLowerCase()) {
+    return true; // original owner always passes
   }
+
+  const url = `https://api.github.com/repos/${username}/${REPO}`;
+  const resp = await fetch(url, { headers: GH_HEADERS });
+
+  if (resp.status === 200) {
+    const repoData = await resp.json();
+
+    // confirm it's actually a fork of the original
+    return repoData.fork && repoData.parent?.full_name?.toLowerCase() === `${OWNER}/${REPO}`.toLowerCase();
+  }
+
+  return false;
 }
 
-// API endpoint
 app.get("/api/check-fork", async (req, res) => {
   const { username } = req.query;
   if (!username) return res.json({ success: false, error: "No username provided" });
 
   try {
-    const forked = await hasUserForked(username);
+    const forked = await hasUserForked(username.trim());
     res.json({ success: forked });
   } catch (err) {
     console.error(err);
@@ -52,12 +51,8 @@ app.get("/api/check-fork", async (req, res) => {
   }
 });
 
-// Serve static files (so index.html + CSS/images work)
-app.use(express.static(__dirname));
-
-// Serve index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
