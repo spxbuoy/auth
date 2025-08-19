@@ -172,22 +172,9 @@
       from { transform: scale(0.8); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
-
-    /* canvas for matrix background */
-    canvas#matrixRain {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      background: black;
-    }
   </style>
 </head>
 <body>
-  <canvas id="matrixRain"></canvas>
-
   <div class="matrix">
     010101010101010<br>
     $ git clone repo<br>
@@ -231,58 +218,3 @@
 
       if (!username) {
         error.innerText = "⚠️ Please enter your GitHub username";
-      }
-    }
-
-    function redirectFork() {
-      window.open("https://github.com/spider660/Spider-bot/fork", "_blank");
-      closeModal();
-    }
-    function closeModal() {
-      document.getElementById("forkModal").style.display = "none";
-    }
-
-    /* Matrix Rain Effect */
-    const canvas = document.getElementById("matrixRain");
-    const ctx = canvas.getContext("2d");
-
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
-
-    const letters = "welcome to spider bot punnel";
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-
-    const drops = [];
-    for (let x = 0; x < columns; x++) {
-      drops[x] = 1;
-    }
-
-    function draw() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const neonColors = ["#0f0", "#0ff", "#f0f"];
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillStyle = neonColors[Math.floor(Math.random() * neonColors.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-
-    setInterval(draw, 33);
-
-    window.addEventListener("resize", () => {
-      canvas.height = window.innerHeight;
-      canvas.width = window.innerWidth;
-    });
-  </script>
-</body>
-</html>
