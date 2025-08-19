@@ -17,28 +17,50 @@ const GH_HEADERS = {
   "User-Agent": "fork-checker"
 };
 
+// Simple in-memory cache (username -> true)
+const verifiedUsers = new Map();
+
 // ✅ Check if user is owner or forked the repo
 async function hasUserForked(username) {
   if (!username) return false;
+  username = username.toLowerCase();
 
-  // Original owner always passes
-  if (username.toLowerCase() === OWNER.toLowerCase()) {
+  // Cached users always pass
+  if (verifiedUsers.has(username)) {
     return true;
   }
 
-  // Check if repo exists under this username
-  const url = `https://api.github.com/repos/${username}/${REPO}`;
-  const resp = await fetch(url, { headers: GH_HEADERS });
+  // Original owner always passes
+  if (username === OWNER.toLowerCase()) {
+    verifiedUsers.set(username, true);
+    return true;
+  }
 
-  if (resp.ok) {
-    const repoData = await resp.json();
+  // Loop through all fork pages
+  let page = 1;
+  while (true) {
+    const url = `https://api.github.com/repos/${OWNER}/${REPO}/forks?per_page=100&page=${page}`;
+    const resp = await fetch(url, { headers: GH_HEADERS });
 
-    // Must be a fork & parent must match the original repo
-    return (
-      repoData.fork === true &&
-      repoData.parent &&
-      repoData.parent.full_name.toLowerCase() === `${OWNER}/${REPO}`.toLowerCase()
+    if (!resp.ok) {
+      console.error("GitHub API error:", resp.status);
+      return false;
+    }
+
+    const forks = await resp.json();
+    if (forks.length === 0) break; // no more pages
+
+    // Check this page
+    const found = forks.some(
+      (fork) => fork.owner && fork.owner.login.toLowerCase() === username
     );
+
+    if (found) {
+      verifiedUsers.set(username, true); // cache success
+      return true;
+    }
+
+    page++;
   }
 
   return false;
